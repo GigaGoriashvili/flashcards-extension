@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                         // Modern JavaScript features
+    "module": "commonjs",                       // Node.js module system
+    "rootDir": "src",                           // Source files directory
+    "outDir": "dist",                           // Compiled files output directory
+    "strict": true,                             // Enable all strict type-checking options
+    "esModuleInterop": true,                    // Compatibility with CommonJS modules
+    "forceConsistentCasingInFileNames": true,   // Enforce consistent casing in file names
+    "skipLibCheck": true,                       // Skip type checking of declaration files
+    "resolveJsonModule": true,                  // Allow importing JSON modules
+    "incremental": true                         // Enable incremental compilation
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
