@@ -1,67 +1,87 @@
 import { Flashcard, BucketMap, AnswerDifficulty } from "./logic/flashcards";
 import { PracticeRecord } from "./types";
 
-// --- Sample Flashcards Setup ---
-const flashcardList: Flashcard[] = [
+// --- Starting Dataset ---
+// Define an initial collection of flashcards for the application
+const initialReviewItems: Flashcard[] = [
   new Flashcard("der Tisch", "the table", "Starts with T", ["noun", "german"]),
   new Flashcard("la silla", "the chair", "Starts with S", ["noun", "spanish"]),
   new Flashcard("bonjour", "hello", "Greeting", ["phrase", "french"]),
-  new Flashcard("arigato", "thank you", "Expression of gratitude", ["phrase", "japanese"]),
+  new Flashcard("arigato", "thank you", "Expression of gratitude", [
+    "phrase",
+    "japanese",
+  ]),
   new Flashcard("der Hund", "the dog", "Common pet", ["noun", "german"]),
   new Flashcard("el gato", "the cat", "Common pet", ["noun", "spanish"]),
 ];
 
-// --- Core State Variables ---
-let buckets: BucketMap = new Map();
-const baseCardSet = new Set(flashcardList);
-buckets.set(0, baseCardSet);
+// --- Application State ---
+// Initialize the knowledge buckets. All new items start in bucket 0.
+let reviewBuckets: BucketMap = new Map();
+const initialItemSet = new Set(initialReviewItems);
+reviewBuckets.set(0, initialItemSet);
 
-let historyRecords: PracticeRecord[] = [];
+// Initialize the log to record practice session outcomes
+let reviewLog: PracticeRecord[] = [];
 
-let simulationDay: number = 0;
+// Variable to track the current simulated day
+let activeDay: number = 0;
 
-// --- State Functions ---
-export const getBucketMap = (): BucketMap => buckets;
+// --- State Interface Methods ---
 
-export const updateBuckets = (updated: BucketMap): void => {
-  buckets = updated;
+// Provides read access to the current state of the knowledge buckets
+export const getBuckets = (): BucketMap => reviewBuckets;
+
+// Allows updating the entire state of the knowledge buckets
+export const setBuckets = (newBuckets: BucketMap): void => {
+  reviewBuckets = newBuckets;
 };
 
-export const getPracticeHistory = (): PracticeRecord[] => historyRecords;
+// Provides read access to the historical log of practice sessions
+export const getHistory = (): PracticeRecord[] => reviewLog;
 
-export const recordPractice = (entry: PracticeRecord): void => {
-  historyRecords.push(entry);
+// Adds a new record to the practice history log
+export const addHistoryRecord = (record: PracticeRecord): void => {
+  reviewLog.push(record);
 };
 
-export const getDay = (): number => simulationDay;
+// Provides the current day number within the simulation
+export const getCurrentDay = (): number => activeDay;
 
-export const nextDay = (): void => {
-  simulationDay++;
+// Increments the simulated day count
+export const incrementDay = (): void => {
+  activeDay++;
 };
 
-// --- Flashcard Utilities ---
-export const locateCard = (front: string, back: string): Flashcard | undefined => {
-  for (const [, cards] of buckets) {
-    for (const card of cards) {
+// Utility function to find a specific flashcard by its front and back content
+export const findCard = (
+  front: string,
+  back: string
+): Flashcard | undefined => {
+  // Iterate through all buckets to find the card
+  for (const [, bucketSet] of reviewBuckets) {
+    for (const card of bucketSet) {
       if (card.front === front && card.back === back) {
         return card;
       }
     }
   }
-
-  // Also check initial set as fallback
-  return flashcardList.find(
+  // Also check the initial set as a fallback
+  return initialReviewItems.find(
     (card) => card.front === front && card.back === back
   );
 };
 
-export const getCardBucket = (card: Flashcard): number | undefined => {
-  for (const [bucketId, cards] of buckets) {
-    if (cards.has(card)) {
-      return bucketId;
+// Utility function to determine which bucket a given flashcard is currently in
+export const findCardBucket = (cardToFind: Flashcard): number | undefined => {
+  for (const [bucketNum, bucketSet] of reviewBuckets) {
+    if (bucketSet.has(cardToFind)) {
+      return bucketNum;
     }
   }
+  // Return undefined if the card is not found in any bucket
   return undefined;
 };
 
-console.log("Initial configuration complete:", buckets);
+// Log the initial state when the module loads
+console.log("State initialized with buckets:", reviewBuckets);
