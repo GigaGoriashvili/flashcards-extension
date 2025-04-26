@@ -1,3 +1,4 @@
+// server/src/persistence.ts
 import { BucketMap, Flashcard } from "./logic/flashcards";
 import { PracticeRecord } from "./types";
 
@@ -15,8 +16,23 @@ export function serializeState(
   buckets: BucketMap,
   history: PracticeRecord[],
   currentDay: number
-): SerializedState | null{
-  return null;
+): SerializedState {
+  const serializedBuckets: { [bucket: number]: Flashcard[] } = {};
+
+  for (const [bucketNumber, flashcardSet] of buckets.entries()) {
+    serializedBuckets[bucketNumber] = Array.from(flashcardSet).map((card) => ({
+      front: card.front,
+      back: card.back,
+      hint: card.hint,
+      tags: [...card.tags],
+    }));
+  }
+
+  return {
+    buckets: serializedBuckets,
+    history: history,
+    currentDay: currentDay,
+  };
 }
 
 // Deserialization (future-proofing) ---
@@ -24,10 +40,25 @@ export function deserializeState(state: SerializedState): {
   buckets: BucketMap;
   history: PracticeRecord[];
   currentDay: number;
-}  {
-    return {
-        buckets: {} as BucketMap,
-        history: [],
-        currentDay: 0
-    };
+} {
+  const buckets: BucketMap = new Map();
+
+  for (const [bucketStr, flashcards] of Object.entries(state.buckets)) {
+    const bucketNum = parseInt(bucketStr, 10);
+    const flashcardSet = new Set<Flashcard>();
+
+    for (const cardData of flashcards) {
+      flashcardSet.add(
+        new Flashcard(cardData.front, cardData.back, cardData.hint, cardData.tags)
+      );
+    }
+
+    buckets.set(bucketNum, flashcardSet);
+  }
+
+  return {
+    buckets,
+    history: state.history,
+    currentDay: state.currentDay,
+  };
 }
