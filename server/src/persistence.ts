@@ -71,18 +71,21 @@ export function saveState(
     currentDay: number,
     filePath: string
   ): void {
+    const serialized = serializeState(buckets, history, currentDay);
+    const jsonData = JSON.stringify(serialized, null, 2);
+    fs.writeFileSync(filePath, jsonData, "utf-8");
+  }
 
-}
 
-
-export function loadState(filePath: string): {
+  export function loadState(filePath: string): {
     buckets: BucketMap;
     history: PracticeRecord[];
     currentDay: number;
-} {
-    return {
-        buckets: new Map(),
-        history: [],
-        currentDay: 0,
-    };
-}
+  } {
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`State file not found: ${filePath}`);
+    }
+    const fileContent = fs.readFileSync(filePath, "utf-8");
+    const parsed = JSON.parse(fileContent) as SerializedState;
+    return deserializeState(parsed);
+  }
