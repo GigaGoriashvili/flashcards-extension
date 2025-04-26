@@ -1,6 +1,7 @@
 // server/src/persistence.ts
 import { BucketMap, Flashcard } from "./logic/flashcards";
 import { PracticeRecord } from "./types";
+import * as fs from "fs";
 
 export interface SerializedState {
   buckets: {
@@ -61,4 +62,27 @@ export function deserializeState(state: SerializedState): {
     history: state.history,
     currentDay: state.currentDay,
   };
+}
+
+
+export function saveState(
+    buckets: BucketMap,
+    history: PracticeRecord[],
+    currentDay: number,
+    filePath: string
+  ): void {
+
+}
+
+
+export function loadState(filePath: string): {
+    buckets: BucketMap;
+    history: PracticeRecord[];
+    currentDay: number;
+} {
+    return {
+        buckets: new Map(),
+        history: [],
+        currentDay: 0,
+    };
 }
